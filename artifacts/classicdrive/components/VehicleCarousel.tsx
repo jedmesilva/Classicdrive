@@ -89,7 +89,7 @@ export default function VehicleCarousel({ activeIndex, onActiveChange }: Props) 
             activeOpacity={0.93}
             onPress={() => onActiveChange(index)}
             style={[
-              styles.card,
+              styles.cardOuter,
               {
                 width: CARD_W,
                 height: CARD_H,
@@ -97,17 +97,19 @@ export default function VehicleCarousel({ activeIndex, onActiveChange }: Props) 
               },
             ]}
           >
-            <Image source={item.image} style={styles.cardImage} resizeMode="cover" />
-            <View style={styles.overlay} />
-            <View style={[styles.badge, { backgroundColor: colors.gold }]}>
-              <Text style={styles.badgeText}>{item.tag}</Text>
-            </View>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardYear}>{item.year}</Text>
-              <Text style={styles.cardName}>{item.name}</Text>
-              <View style={{ flexDirection: "row", alignItems: "baseline", gap: 4 }}>
-                <Text style={[styles.cardPrice, { color: colors.goldLight }]}>{item.price}</Text>
-                <Text style={styles.cardPriceSub}>/hora</Text>
+            <View style={styles.cardInner}>
+              <Image source={item.image} style={styles.cardImage} resizeMode="cover" />
+              <View style={styles.overlay} />
+              <View style={[styles.badge, { backgroundColor: colors.gold }]}>
+                <Text style={styles.badgeText}>{item.tag}</Text>
+              </View>
+              <View style={styles.cardContent}>
+                <Text style={styles.cardYear}>{item.year}</Text>
+                <Text style={styles.cardName}>{item.name}</Text>
+                <View style={{ flexDirection: "row", alignItems: "baseline", gap: 4 }}>
+                  <Text style={[styles.cardPrice, { color: colors.goldLight }]}>{item.price}</Text>
+                  <Text style={styles.cardPriceSub}>/hora</Text>
+                </View>
               </View>
             </View>
           </TouchableOpacity>
@@ -136,9 +138,13 @@ export default function VehicleCarousel({ activeIndex, onActiveChange }: Props) 
 }
 
 const styles = StyleSheet.create({
-  card: {
+  cardOuter: {
     borderRadius: 20,
     borderWidth: 3,
+  },
+  cardInner: {
+    flex: 1,
+    borderRadius: 17,
     overflow: "hidden",
     position: "relative",
   },
