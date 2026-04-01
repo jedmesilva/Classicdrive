@@ -20,7 +20,7 @@ import WaypointCard, { cycleTime } from "@/components/WaypointCard";
 const MODALITIES: { id: Modality; label: string; icon: string }[] = [
   { id: "rotalivre", label: "Rota Livre", icon: "navigation" },
   { id: "exposicao", label: "Exposição",  icon: "star"       },
-  { id: "rota",      label: "Comunidade", icon: "map"        },
+  { id: "rota",      label: "Rota pública", icon: "map"        },
 ];
 
 export default function HomeScreen() {
