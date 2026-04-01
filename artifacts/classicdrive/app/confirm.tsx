@@ -350,12 +350,11 @@ const styles = StyleSheet.create({
   },
   vehicleImageWrap: {
     width: 110,
-    position: "relative",
+    height: 120,
   },
   vehicleImage: {
     width: "100%",
     height: "100%",
-    minHeight: 110,
   },
   vehicleImageFade: {
     position: "absolute",
