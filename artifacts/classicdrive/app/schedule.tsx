@@ -236,6 +236,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     gap: 8,
     flexDirection: "row",
+    alignItems: "center",
   },
   chip: {
     paddingHorizontal: 16,
@@ -288,6 +289,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     gap: 8,
     marginBottom: 16,
+    alignItems: "center",
   },
   timeSlot: {
     paddingHorizontal: 14,
