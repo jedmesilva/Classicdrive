@@ -1,0 +1,26 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "81U2xOkxa83dnMKh_wORv"
+uri = "file://artifacts/classicdrive/assets/images/icon.png"
+type = "image"
+title = "classicdrive app icon"
+
+[[generated]]
+id = "Ha_E1dnSmjSlWGubvpygc"
+uri = "file://artifacts/classicdrive/assets/images/mustang.png"
+type = "image"
+title = "mustang classic car"
+
+[[generated]]
+id = "-eUoVjAznt6T5hZkoOUwV"
+uri = "file://artifacts/classicdrive/assets/images/belair.png"
+type = "image"
+title = "bel air classic car"
+
+[[generated]]
+id = "T4y8mf7ErIZgLkT1k1Qam"
+uri = "file://artifacts/classicdrive/assets/images/porsche.png"
+type = "image"
+title = "porsche 356 classic car"

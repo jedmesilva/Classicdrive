@@ -1,0 +1,27 @@
+kind = "mobile"
+previewPath = "/"
+title = "ClassicDrive"
+version = "1.0.0"
+id = "artifacts/classicdrive"
+router = "expo-domain"
+
+[[integratedSkills]]
+name = "expo"
+version = "1.0.0"
+
+[[services]]
+ensurePreviewReachable = "/status"
+name = "expo"
+paths = [ "/" ]
+localPort = 24505
+
+[services.development]
+run = "pnpm --filter @workspace/classicdrive run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/classicdrive", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/classicdrive", "run", "serve" ]
+
+[services.env]
+PORT = "24505"
+BASE_PATH = "/"
