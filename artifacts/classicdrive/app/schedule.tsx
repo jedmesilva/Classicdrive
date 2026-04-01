@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Modal,
   Platform,
   ScrollView,
   StyleSheet,
@@ -7,6 +8,9 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
@@ -16,15 +20,19 @@ function todayStr() {
   return new Date().toISOString().split("T")[0];
 }
 
-function nowTimeStr() {
+function nowTime() {
   const n = new Date();
   return `${String(n.getHours()).padStart(2, "0")}:${String(n.getMinutes()).padStart(2, "0")}`;
 }
 
+function dateFromStr(s: string) {
+  const [y, m, d] = s.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
 function formatDate(s: string): string {
   if (!s) return "";
-  const [y, m, d] = s.split("-");
-  const date = new Date(Number(y), Number(m) - 1, Number(d));
+  const date = dateFromStr(s);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const tom = new Date(today);
@@ -44,7 +52,9 @@ function buildDayChips() {
     d.setDate(d.getDate() + i);
     const str = d.toISOString().split("T")[0];
     const label =
-      i === 0 ? "Hoje" : i === 1
+      i === 0
+        ? "Hoje"
+        : i === 1
         ? "Amanhã"
         : d.toLocaleDateString("pt-BR", { weekday: "short", day: "numeric" });
     return { str, label };
@@ -57,23 +67,66 @@ const TIME_SLOTS = [
   "18:00","19:00","20:00","21:00","22:00",
 ];
 
+type PickerMode = "date" | "time" | null;
+
 export default function ScheduleScreen() {
   const colors = useColors();
   const { setWhen } = useBooking();
   const today = todayStr();
   const [date, setDate] = useState(today);
-  const [time, setTime] = useState(nowTimeStr());
+  const [time, setTime] = useState(nowTime());
+  const [pickerMode, setPickerMode] = useState<PickerMode>(null);
+  const [tempDate, setTempDate] = useState<Date>(new Date());
 
-  const currentTime = nowTimeStr();
+  const currentTime = nowTime();
   const isNow =
     date === today &&
     Math.abs(
       parseInt(time.replace(":", "")) - parseInt(currentTime.replace(":", ""))
     ) <= 5;
 
+  function openDatePicker() {
+    setTempDate(dateFromStr(date));
+    setPickerMode("date");
+  }
+
+  function openTimePicker() {
+    const [h, m] = time.split(":").map(Number);
+    const d = new Date();
+    d.setHours(h, m, 0, 0);
+    setTempDate(d);
+    setPickerMode("time");
+  }
+
   function handleNow() {
     setDate(today);
-    setTime(nowTimeStr());
+    setTime(nowTime());
+  }
+
+  function handlePickerChange(event: DateTimePickerEvent, selected?: Date) {
+    if (Platform.OS === "android") {
+      setPickerMode(null);
+      if (event.type === "dismissed" || !selected) return;
+    }
+    if (!selected) return;
+    setTempDate(selected);
+    if (Platform.OS === "android") applyPicker(selected);
+  }
+
+  function applyPicker(selected?: Date) {
+    const d = selected ?? tempDate;
+    if (pickerMode === "date") {
+      setDate(d.toISOString().split("T")[0]);
+    } else {
+      setTime(
+        `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`
+      );
+    }
+    if (Platform.OS === "ios") setPickerMode(null);
+  }
+
+  function cancelPicker() {
+    setPickerMode(null);
   }
 
   function handleConfirm() {
@@ -93,10 +146,11 @@ export default function ScheduleScreen() {
         </Text>
       </View>
 
+      {/* Day chips */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={styles.dayChipsScroll}
+        style={styles.scrollRow}
         contentContainerStyle={styles.dayChips}
       >
         <TouchableOpacity
@@ -135,8 +189,13 @@ export default function ScheduleScreen() {
         })}
       </ScrollView>
 
+      {/* Trigger cards — tap to open native picker */}
       <View style={styles.triggerRow}>
-        <View style={[styles.triggerCard, { backgroundColor: colors.surface, borderColor: `${colors.gold}40` }]}>
+        <TouchableOpacity
+          onPress={openDatePicker}
+          style={[styles.triggerCard, { backgroundColor: colors.surface, borderColor: `${colors.gold}40` }]}
+          activeOpacity={0.75}
+        >
           <View style={[styles.triggerIcon, { backgroundColor: `${colors.gold}22` }]}>
             <Feather name="calendar" size={20} color={colors.gold} />
           </View>
@@ -146,9 +205,14 @@ export default function ScheduleScreen() {
               {isNow ? "Hoje" : formatDate(date)}
             </Text>
           </View>
-        </View>
+          <Feather name="chevron-down" size={16} color={colors.textPlaceholder} />
+        </TouchableOpacity>
 
-        <View style={[styles.triggerCard, { backgroundColor: colors.surface, borderColor: `${colors.gold}40` }]}>
+        <TouchableOpacity
+          onPress={openTimePicker}
+          style={[styles.triggerCard, { backgroundColor: colors.surface, borderColor: `${colors.gold}40` }]}
+          activeOpacity={0.75}
+        >
           <View style={[styles.triggerIcon, { backgroundColor: `${colors.gold}22` }]}>
             <Feather name="clock" size={20} color={colors.gold} />
           </View>
@@ -156,13 +220,15 @@ export default function ScheduleScreen() {
             <Text style={[styles.triggerLabel, { color: colors.textTertiary }]}>HORA</Text>
             <Text style={[styles.triggerValue, { color: colors.foreground }]}>{time}</Text>
           </View>
-        </View>
+          <Feather name="chevron-down" size={16} color={colors.textPlaceholder} />
+        </TouchableOpacity>
       </View>
 
+      {/* Time slot chips */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={styles.timeSlotsScroll}
+        style={styles.scrollRow}
         contentContainerStyle={styles.timeSlots}
       >
         {TIME_SLOTS.map((slot) => {
@@ -187,6 +253,7 @@ export default function ScheduleScreen() {
         })}
       </ScrollView>
 
+      {/* Confirm banner */}
       <View style={[styles.confirmBanner, { backgroundColor: `${colors.gold}12`, borderColor: `${colors.gold}30` }]}>
         <Text style={[styles.confirmLabel, { color: colors.mutedForeground }]}>
           Confirmando agendamento para
@@ -196,6 +263,7 @@ export default function ScheduleScreen() {
         </Text>
       </View>
 
+      {/* CTA */}
       <View style={styles.ctaWrapper}>
         <TouchableOpacity
           onPress={handleConfirm}
@@ -206,6 +274,56 @@ export default function ScheduleScreen() {
           <Text style={styles.ctaText}>Confirmar horário</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Android: renders as dialog, no modal needed */}
+      {Platform.OS === "android" && pickerMode !== null && (
+        <DateTimePicker
+          value={tempDate}
+          mode={pickerMode}
+          display="default"
+          onChange={handlePickerChange}
+          minimumDate={pickerMode === "date" ? new Date() : undefined}
+          locale="pt-BR"
+        />
+      )}
+
+      {/* iOS: custom bottom modal with spinner */}
+      {Platform.OS === "ios" && (
+        <Modal
+          visible={pickerMode !== null}
+          transparent
+          animationType="slide"
+          onRequestClose={cancelPicker}
+        >
+          <TouchableOpacity
+            style={styles.pickerBackdrop}
+            activeOpacity={1}
+            onPress={cancelPicker}
+          />
+          <View style={[styles.pickerSheet, { backgroundColor: colors.sheet }]}>
+            <View style={[styles.pickerHeader, { borderBottomColor: colors.divider }]}>
+              <TouchableOpacity onPress={cancelPicker} style={styles.pickerBtn}>
+                <Text style={[styles.pickerBtnText, { color: colors.mutedForeground }]}>Cancelar</Text>
+              </TouchableOpacity>
+              <Text style={[styles.pickerTitle, { color: colors.foreground }]}>
+                {pickerMode === "date" ? "Selecionar dia" : "Selecionar hora"}
+              </Text>
+              <TouchableOpacity onPress={() => applyPicker()} style={styles.pickerBtn}>
+                <Text style={[styles.pickerBtnText, { color: colors.gold, fontWeight: "700" }]}>OK</Text>
+              </TouchableOpacity>
+            </View>
+            <DateTimePicker
+              value={tempDate}
+              mode={pickerMode ?? "date"}
+              display="spinner"
+              onChange={handlePickerChange}
+              minimumDate={pickerMode === "date" ? new Date() : undefined}
+              locale="pt-BR"
+              style={styles.picker}
+            />
+          </View>
+        </Modal>
+      )}
     </View>
   );
 }
@@ -233,7 +351,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Inter_400Regular",
   },
-  dayChipsScroll: {
+  scrollRow: {
     flexGrow: 0,
     flexShrink: 0,
   },
@@ -291,10 +409,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontFamily: "Inter_700Bold",
   },
-  timeSlotsScroll: {
-    flexGrow: 0,
-    flexShrink: 0,
-  },
   timeSlots: {
     paddingHorizontal: 24,
     gap: 8,
@@ -345,4 +459,32 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_700Bold",
     letterSpacing: 0.3,
   },
+  pickerBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.35)",
+  },
+  pickerSheet: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    overflow: "hidden",
+  },
+  pickerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+  },
+  pickerTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    fontFamily: "Inter_600SemiBold",
+  },
+  pickerBtn: { paddingHorizontal: 8, paddingVertical: 4 },
+  pickerBtnText: {
+    fontSize: 16,
+    fontFamily: "Inter_400Regular",
+  },
+  picker: { width: "100%" },
 });
