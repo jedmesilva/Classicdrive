@@ -96,14 +96,23 @@ export default function ConfirmScreen() {
   const meta = modalityMeta[modality];
 
   const rows: { label: string; value: string }[] = [];
-  if (when)              rows.push({ label: "Quando",    value: when });
-  if (modality === "transfer" || modality === "rota") {
-    if (from)            rows.push({ label: "De onde",   value: from });
-    if (to)              rows.push({ label: "Para onde", value: to });
+  if (when) rows.push({ label: "Quando", value: when });
+
+  if (modality === "transfer") {
+    if (from) rows.push({ label: "De onde",   value: from });
+    if (to)   rows.push({ label: "Para onde", value: to });
   }
-  if (modality === "exposicao" && location) rows.push({ label: "Local",    value: location });
-  if (duration)          rows.push({ label: "Duração",   value: duration.label });
-  if (route)             rows.push({ label: "Rota",      value: route.name });
+
+  if (modality === "exposicao") {
+    if (location) rows.push({ label: "Local da exposição", value: location });
+    if (duration) rows.push({ label: "Duração",            value: duration.label });
+  }
+
+  if (modality === "rota") {
+    if (route) rows.push({ label: "Rota",      value: route.name });
+    if (from)  rows.push({ label: "De onde",   value: from });
+    if (to)    rows.push({ label: "Para onde", value: to });
+  }
 
   const topPad    = Platform.OS === "web" ? 52 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
