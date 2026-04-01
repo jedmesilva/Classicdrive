@@ -1,12 +1,12 @@
 import React from "react";
 import {
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -116,6 +116,8 @@ export default function ProfileScreen() {
       {/* Menu */}
       <ScrollView
         showsVerticalScrollIndicator={false}
+        bounces
+        scrollEventThrottle={16}
         contentContainerStyle={{ paddingBottom: bottomPad + 16 }}
       >
         {sections.map((section, si) => (
