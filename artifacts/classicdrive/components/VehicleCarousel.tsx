@@ -84,20 +84,14 @@ export default function VehicleCarousel({ activeIndex, onActiveChange }: Props) 
         keyExtractor={(item) => String(item.id)}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
-        renderItem={({ item, index }) => (
-          <TouchableOpacity
-            activeOpacity={0.93}
-            onPress={() => onActiveChange(index)}
-            style={[
-              styles.cardOuter,
-              {
-                width: CARD_W,
-                height: CARD_H,
-                borderColor: activeIndex === index ? colors.gold : "transparent",
-              },
-            ]}
-          >
-            <View style={styles.cardInner}>
+        renderItem={({ item, index }) => {
+          const selected = activeIndex === index;
+          return (
+            <TouchableOpacity
+              activeOpacity={0.93}
+              onPress={() => onActiveChange(index)}
+              style={[styles.card, { width: CARD_W, height: CARD_H }]}
+            >
               <Image source={item.image} style={styles.cardImage} resizeMode="cover" />
               <View style={styles.overlay} />
               <View style={[styles.badge, { backgroundColor: colors.gold }]}>
@@ -111,9 +105,15 @@ export default function VehicleCarousel({ activeIndex, onActiveChange }: Props) 
                   <Text style={styles.cardPriceSub}>/hora</Text>
                 </View>
               </View>
-            </View>
-          </TouchableOpacity>
-        )}
+              {selected && (
+                <View
+                  style={[styles.selectionRing, { borderColor: colors.gold }]}
+                  pointerEvents="none"
+                />
+              )}
+            </TouchableOpacity>
+          );
+        }}
       />
       <View style={styles.dots}>
         {VEHICLES.map((_, i) => (
@@ -138,18 +138,19 @@ export default function VehicleCarousel({ activeIndex, onActiveChange }: Props) 
 }
 
 const styles = StyleSheet.create({
-  cardOuter: {
+  card: {
     borderRadius: 20,
-    borderWidth: 3,
+    overflow: "hidden",
+    position: "relative",
   },
-  cardInner: {
+  selectionRing: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    borderRadius: 17,
-    overflow: "hidden",
+    borderRadius: 20,
+    borderWidth: 3,
   },
   cardImage: {
     position: "absolute",
