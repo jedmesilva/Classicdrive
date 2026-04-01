@@ -16,6 +16,7 @@ export type Vehicle = {
   year: string;
   name: string;
   price: string;
+  priceNum: number;
   tag: string;
   image: any;
 };
@@ -26,6 +27,7 @@ export const VEHICLES: Vehicle[] = [
     year: "1969",
     name: "Ford Mustang Fastback",
     price: "R$220",
+    priceNum: 220,
     tag: "VEÍCULO CLÁSSICO",
     image: require("@/assets/images/mustang.png"),
   },
@@ -34,6 +36,7 @@ export const VEHICLES: Vehicle[] = [
     year: "1957",
     name: "Chevrolet Bel Air",
     price: "R$280",
+    priceNum: 280,
     tag: "VEÍCULO CLÁSSICO",
     image: require("@/assets/images/belair.png"),
   },
@@ -42,6 +45,7 @@ export const VEHICLES: Vehicle[] = [
     year: "1965",
     name: "Porsche 356 C",
     price: "R$350",
+    priceNum: 350,
     tag: "ESPORTIVO",
     image: require("@/assets/images/porsche.png"),
   },

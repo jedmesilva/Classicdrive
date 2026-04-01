@@ -1,5 +1,18 @@
 import React, { createContext, useContext, useState } from "react";
 
+export type PaymentMethod = {
+  id: string;
+  label: string;
+  detail: string;
+  icon: string;
+};
+
+export const PAYMENT_METHODS: PaymentMethod[] = [
+  { id: "cc1", label: "Mastercard", detail: "•••• 4521", icon: "💳" },
+  { id: "cc2", label: "Visa",       detail: "•••• 8834", icon: "💳" },
+  { id: "pix", label: "Pix",        detail: "Chave CPF", icon: "⚡" },
+];
+
 export type Modality = "transfer" | "exposicao" | "rota";
 
 export type Duration = { label: string; hours: number };
@@ -21,6 +34,8 @@ type BookingState = {
   location: string;
   duration: Duration | null;
   route: Route | null;
+  activeVehicleIndex: number;
+  payment: PaymentMethod;
   setModality: (v: Modality) => void;
   setWhen: (v: string) => void;
   setFrom: (v: string) => void;
@@ -28,6 +43,8 @@ type BookingState = {
   setLocation: (v: string) => void;
   setDuration: (v: Duration | null) => void;
   setRoute: (v: Route | null) => void;
+  setActiveVehicleIndex: (v: number) => void;
+  setPayment: (v: PaymentMethod) => void;
 };
 
 const BookingContext = createContext<BookingState | null>(null);
@@ -40,12 +57,16 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
   const [location, setLocation] = useState("");
   const [duration, setDuration] = useState<Duration | null>(null);
   const [route, setRoute] = useState<Route | null>(null);
+  const [activeVehicleIndex, setActiveVehicleIndex] = useState(0);
+  const [payment, setPayment] = useState<PaymentMethod>(PAYMENT_METHODS[0]);
 
   return (
     <BookingContext.Provider
       value={{
         modality, when, from, to, location, duration, route,
+        activeVehicleIndex, payment,
         setModality, setWhen, setFrom, setTo, setLocation, setDuration, setRoute,
+        setActiveVehicleIndex, setPayment,
       }}
     >
       {children}

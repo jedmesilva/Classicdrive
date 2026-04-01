@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Image,
   Platform,
@@ -13,7 +13,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useBooking, type Modality } from "@/context/BookingContext";
-import VehicleCarousel from "@/components/VehicleCarousel";
+import VehicleCarousel, { VEHICLES } from "@/components/VehicleCarousel";
 import BookingCard from "@/components/BookingCard";
 
 const MODALITIES: { id: Modality; label: string; icon: string }[] = [
@@ -28,8 +28,8 @@ export default function HomeScreen() {
   const {
     modality, setModality,
     when, from, to, location, duration, route,
+    activeVehicleIndex: activeIndex, setActiveVehicleIndex: setActiveIndex,
   } = useBooking();
-  const [activeIndex, setActiveIndex] = useState(0);
 
   const topPad    = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
@@ -219,6 +219,7 @@ export default function HomeScreen() {
             ]}
             activeOpacity={canContract ? 0.88 : 1}
             disabled={!canContract}
+            onPress={() => canContract && router.push("/confirm")}
           >
             <Text
               style={[
@@ -226,7 +227,9 @@ export default function HomeScreen() {
                 { color: canContract ? "#fff" : colors.textPlaceholder },
               ]}
             >
-              {canContract ? "Contratar agora" : "Preencha os campos para continuar"}
+              {canContract
+                ? `Contratar · ${VEHICLES[activeIndex].name}`
+                : "Preencha os campos para continuar"}
             </Text>
           </TouchableOpacity>
         </View>

@@ -31,6 +31,7 @@ const colors = {
     sheetHandle: "#E0D9D0",
     gold: "#C9A96E",
     goldLight: "#E8D5A3",
+    goldDark: "#A8834A",
     textSecondary: "#999999",
     textTertiary: "#BBBBBB",
     textMuted: "#AAAAAA",
