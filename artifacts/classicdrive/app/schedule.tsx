@@ -96,6 +96,7 @@ export default function ScheduleScreen() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={styles.dayChipsScroll}
         contentContainerStyle={styles.dayChips}
       >
         <TouchableOpacity
@@ -161,6 +162,7 @@ export default function ScheduleScreen() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={styles.timeSlotsScroll}
         contentContainerStyle={styles.timeSlots}
       >
         {TIME_SLOTS.map((slot) => {
@@ -231,6 +233,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "Inter_400Regular",
   },
+  dayChipsScroll: {
+    flexGrow: 0,
+    flexShrink: 0,
+  },
   dayChips: {
     paddingHorizontal: 24,
     paddingBottom: 20,
@@ -284,6 +290,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     fontFamily: "Inter_700Bold",
+  },
+  timeSlotsScroll: {
+    flexGrow: 0,
+    flexShrink: 0,
   },
   timeSlots: {
     paddingHorizontal: 24,
