@@ -106,16 +106,16 @@ export default function HomeScreen() {
             onPress={() => router.push("/schedule")}
           />
           <BookingCard
-            label="Rota"
-            value={route?.name ?? ""}
-            placeholder="Escolher rota"
-            onPress={() => router.push("/route")}
-          />
-          <BookingCard
             label="De onde?"
             value={from}
             placeholder="Selecionar origem"
             onPress={() => router.push({ pathname: "/address", params: { field: "from" } })}
+          />
+          <BookingCard
+            label="Rota"
+            value={route?.name ?? ""}
+            placeholder="Escolher rota"
+            onPress={() => router.push("/route")}
           />
           <BookingCard
             label="Para onde?"

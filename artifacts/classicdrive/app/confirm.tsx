@@ -109,8 +109,8 @@ export default function ConfirmScreen() {
   }
 
   if (modality === "rota") {
-    if (route) rows.push({ label: "Rota",      value: route.name });
     if (from)  rows.push({ label: "De onde",   value: from });
+    if (route) rows.push({ label: "Rota",      value: route.name });
     if (to)    rows.push({ label: "Para onde", value: to });
   }
 
