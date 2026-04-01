@@ -12,14 +12,15 @@ import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
-import { useBooking, type Modality } from "@/context/BookingContext";
+import { useBooking, type Modality, type Waypoint } from "@/context/BookingContext";
 import VehicleCarousel, { VEHICLES } from "@/components/VehicleCarousel";
 import BookingCard from "@/components/BookingCard";
+import WaypointCard, { cycleTime } from "@/components/WaypointCard";
 
 const MODALITIES: { id: Modality; label: string; icon: string }[] = [
-  { id: "transfer",  label: "Transfer",  icon: "arrow-right" },
-  { id: "exposicao", label: "Exposição", icon: "star"        },
-  { id: "rota",      label: "Rota",      icon: "map"         },
+  { id: "rotalivre", label: "Rota Livre", icon: "navigation" },
+  { id: "exposicao", label: "Exposição",  icon: "star"       },
+  { id: "rota",      label: "Comunidade", icon: "map"        },
 ];
 
 export default function HomeScreen() {
@@ -28,6 +29,7 @@ export default function HomeScreen() {
   const {
     modality, setModality,
     when, from, to, location, duration, route,
+    waypoints, setWaypoints,
     activeVehicleIndex: activeIndex, setActiveVehicleIndex: setActiveIndex,
   } = useBooking();
 
@@ -38,13 +40,37 @@ export default function HomeScreen() {
     setModality(m);
   }
 
+  function addWaypoint() {
+    const newWp: Waypoint = {
+      id: `wp-${Date.now()}`,
+      address: "",
+      minutes: 30,
+    };
+    setWaypoints([...waypoints, newWp]);
+  }
+
+  function removeWaypoint(id: string) {
+    setWaypoints(waypoints.filter(w => w.id !== id));
+  }
+
+  function moveWaypoint(index: number, direction: "up" | "down") {
+    const next = [...waypoints];
+    const swap = direction === "up" ? index - 1 : index + 1;
+    [next[index], next[swap]] = [next[swap], next[index]];
+    setWaypoints(next);
+  }
+
+  function cycleWaypointTime(id: string) {
+    setWaypoints(waypoints.map(w => w.id === id ? { ...w, minutes: cycleTime(w.minutes) } : w));
+  }
+
   const canContract =
-    modality === "transfer"  ? !!to :
+    modality === "rotalivre" ? (!!from && !!to) :
     modality === "exposicao" ? (!!location && !!duration) :
     modality === "rota"      ? (!!route && !!from) : false;
 
   function renderFields() {
-    if (modality === "transfer") {
+    if (modality === "rotalivre") {
       return (
         <>
           <BookingCard
@@ -59,6 +85,43 @@ export default function HomeScreen() {
             placeholder="Selecionar origem"
             onPress={() => router.push({ pathname: "/address", params: { field: "from" } })}
           />
+
+          {/* Waypoints */}
+          {waypoints.map((wp, i) => (
+            <WaypointCard
+              key={wp.id}
+              index={i}
+              total={waypoints.length}
+              address={wp.address}
+              minutes={wp.minutes}
+              onPressAddress={() =>
+                router.push({
+                  pathname: "/address",
+                  params: { field: "waypoint", waypointId: wp.id, waypointIndex: String(i) },
+                })
+              }
+              onCycleTime={() => cycleWaypointTime(wp.id)}
+              onMoveUp={() => moveWaypoint(i, "up")}
+              onMoveDown={() => moveWaypoint(i, "down")}
+              onRemove={() => removeWaypoint(wp.id)}
+            />
+          ))}
+
+          {/* Add waypoint button */}
+          <View style={styles.addWpRow}>
+            <View style={styles.addWpTimeline}>
+              <View style={[styles.addWpLine, { borderLeftColor: colors.border }]} />
+            </View>
+            <TouchableOpacity
+              style={[styles.addWpBtn, { borderColor: colors.border, backgroundColor: colors.card }]}
+              onPress={addWaypoint}
+              activeOpacity={0.8}
+            >
+              <Feather name="plus" size={15} color={colors.gold} />
+              <Text style={[styles.addWpText, { color: colors.gold }]}>Adicionar parada</Text>
+            </TouchableOpacity>
+          </View>
+
           <BookingCard
             label="Para onde?"
             value={to}
@@ -287,7 +350,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   tabLabel: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: "Inter_400Regular",
   },
   tabLabelActive: {
@@ -300,6 +363,40 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   bookingSection: { paddingHorizontal: 24 },
+
+  addWpRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 0,
+  },
+  addWpTimeline: {
+    width: 12,
+    alignItems: "center",
+    paddingVertical: 6,
+  },
+  addWpLine: {
+    flex: 1,
+    borderLeftWidth: 2,
+    borderStyle: "dashed",
+  },
+  addWpBtn: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    marginBottom: 16,
+  },
+  addWpText: {
+    fontSize: 14,
+    fontWeight: "600",
+    fontFamily: "Inter_600SemiBold",
+  },
+
   ctaWrapper: {
     paddingHorizontal: 24,
     paddingTop: 24,

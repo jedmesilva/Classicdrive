@@ -13,7 +13,7 @@ export const PAYMENT_METHODS: PaymentMethod[] = [
   { id: "pix", label: "Pix",        detail: "Chave CPF", icon: "⚡" },
 ];
 
-export type Modality = "transfer" | "exposicao" | "rota";
+export type Modality = "rotalivre" | "exposicao" | "rota";
 
 export type Duration = { label: string; hours: number };
 
@@ -26,6 +26,12 @@ export type Route = {
   author: string;
 };
 
+export type Waypoint = {
+  id: string;
+  address: string;
+  minutes: number;
+};
+
 type BookingState = {
   modality: Modality;
   when: string;
@@ -34,6 +40,7 @@ type BookingState = {
   location: string;
   duration: Duration | null;
   route: Route | null;
+  waypoints: Waypoint[];
   activeVehicleIndex: number;
   payment: PaymentMethod;
   setModality: (v: Modality) => void;
@@ -43,6 +50,8 @@ type BookingState = {
   setLocation: (v: string) => void;
   setDuration: (v: Duration | null) => void;
   setRoute: (v: Route | null) => void;
+  setWaypoints: (v: Waypoint[]) => void;
+  setWaypointAddress: (id: string, address: string) => void;
   setActiveVehicleIndex: (v: number) => void;
   setPayment: (v: PaymentMethod) => void;
 };
@@ -50,23 +59,28 @@ type BookingState = {
 const BookingContext = createContext<BookingState | null>(null);
 
 export function BookingProvider({ children }: { children: React.ReactNode }) {
-  const [modality, setModality] = useState<Modality>("transfer");
+  const [modality, setModality] = useState<Modality>("rotalivre");
   const [when, setWhen] = useState("Hoje, Agora");
   const [from, setFrom] = useState("Rua Havaí 350, Centro");
   const [to, setTo] = useState("");
   const [location, setLocation] = useState("");
   const [duration, setDuration] = useState<Duration | null>(null);
   const [route, setRoute] = useState<Route | null>(null);
+  const [waypoints, setWaypoints] = useState<Waypoint[]>([]);
   const [activeVehicleIndex, setActiveVehicleIndex] = useState(0);
   const [payment, setPayment] = useState<PaymentMethod>(PAYMENT_METHODS[0]);
+
+  function setWaypointAddress(id: string, address: string) {
+    setWaypoints(ws => ws.map(w => w.id === id ? { ...w, address } : w));
+  }
 
   return (
     <BookingContext.Provider
       value={{
-        modality, when, from, to, location, duration, route,
+        modality, when, from, to, location, duration, route, waypoints,
         activeVehicleIndex, payment,
         setModality, setWhen, setFrom, setTo, setLocation, setDuration, setRoute,
-        setActiveVehicleIndex, setPayment,
+        setWaypoints, setWaypointAddress, setActiveVehicleIndex, setPayment,
       }}
     >
       {children}

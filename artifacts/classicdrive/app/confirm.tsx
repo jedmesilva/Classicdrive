@@ -14,6 +14,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useBooking } from "@/context/BookingContext";
+import { formatMinutes } from "@/components/WaypointCard";
 import { VEHICLES } from "@/components/VehicleCarousel";
 
 const DOT_R = 12;
@@ -73,8 +74,8 @@ export default function ConfirmScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const {
-    modality, when, from, to, location, duration, route,
-    activeVehicleIndex, payment, setPayment,
+    modality, when, from, to, location, duration, route, waypoints,
+    activeVehicleIndex, payment,
   } = useBooking();
 
   const [note, setNote] = useState("");
@@ -84,23 +85,34 @@ export default function ConfirmScreen() {
   const vehicle = VEHICLES[activeVehicleIndex] ?? VEHICLES[0];
 
   let hours = 2;
-  if (modality === "exposicao" && duration) hours = duration.hours;
-  if (modality === "rota" && route) hours = parseRouteDurationHours(route.duration);
+  if (modality === "exposicao" && duration) {
+    hours = duration.hours;
+  } else if (modality === "rota" && route) {
+    hours = parseRouteDurationHours(route.duration);
+  } else if (modality === "rotalivre") {
+    const stopMins   = waypoints.reduce((s, w) => s + w.minutes, 0);
+    const travelMins = (waypoints.length + 1) * 15;
+    hours = Math.max(1, (stopMins + travelMins) / 60);
+  }
+  const hoursDisplay = Number.isInteger(hours) ? `${hours}h` : `${Math.round(hours * 10) / 10}h`;
   const total = Math.round(vehicle.priceNum * hours);
 
   const modalityMeta: Record<string, { label: string; icon: string }> = {
-    transfer:  { label: "Transfer",           icon: "arrow-right" },
-    exposicao: { label: "Exposição",          icon: "star"        },
-    rota:      { label: "Rota da Comunidade", icon: "map"         },
+    rotalivre: { label: "Rota Livre",         icon: "navigation" },
+    exposicao: { label: "Exposição",          icon: "star"       },
+    rota:      { label: "Rota da Comunidade", icon: "map"        },
   };
   const meta = modalityMeta[modality];
 
   const rows: { label: string; value: string }[] = [];
   if (when) rows.push({ label: "Quando", value: when });
 
-  if (modality === "transfer") {
-    if (from) rows.push({ label: "De onde",   value: from });
-    if (to)   rows.push({ label: "Para onde", value: to });
+  if (modality === "rotalivre") {
+    if (from) rows.push({ label: "De onde", value: from });
+    waypoints.forEach((wp, i) => {
+      if (wp.address) rows.push({ label: `Parada ${i + 1} · ${formatMinutes(wp.minutes)}`, value: wp.address });
+    });
+    if (to) rows.push({ label: "Para onde", value: to });
   }
 
   if (modality === "exposicao") {
@@ -212,7 +224,7 @@ export default function ConfirmScreen() {
               <Text style={[styles.priceRowLabel, { color: colors.mutedForeground }]}>
                 {modality === "exposicao" ? "Duração" : modality === "rota" ? "Duração da rota" : "Duração estimada"}
               </Text>
-              <Text style={[styles.priceRowValue, { color: colors.foreground }]}>~{hours}h</Text>
+              <Text style={[styles.priceRowValue, { color: colors.foreground }]}>~{hoursDisplay}</Text>
             </View>
             <View style={styles.priceRow}>
               <Text style={[styles.priceRowLabel, { color: colors.mutedForeground }]}>Valor por hora</Text>

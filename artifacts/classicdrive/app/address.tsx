@@ -53,8 +53,12 @@ type AddressItem = { id: number; main: string; sub: string; icon: string };
 
 export default function AddressScreen() {
   const colors = useColors();
-  const { field } = useLocalSearchParams<{ field: "from" | "to" | "location" }>();
-  const { setFrom, setTo, setLocation } = useBooking();
+  const { field, waypointId, waypointIndex } = useLocalSearchParams<{
+    field: "from" | "to" | "location" | "waypoint";
+    waypointId?: string;
+    waypointIndex?: string;
+  }>();
+  const { setFrom, setTo, setLocation, setWaypointAddress } = useBooking();
   const [query, setQuery] = useState("");
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<TextInput>(null);
@@ -66,15 +70,24 @@ export default function AddressScreen() {
   const showSuggestions = query.length >= 2;
   const list = showSuggestions ? getSuggestions(query) : RECENT_ADDRESSES;
   const listLabel = showSuggestions ? "SUGESTÕES" : "RECENTES";
+
   const label =
     field === "from"     ? "De onde?" :
     field === "location" ? "Local da exposição" :
+    field === "waypoint" ? `Parada ${waypointIndex ? Number(waypointIndex) + 1 : ""}` :
     "Para onde?";
+
+  const subtitle =
+    field === "from"     ? "Digite ou selecione o ponto de partida" :
+    field === "location" ? "Digite o local onde o veículo será exibido" :
+    field === "waypoint" ? "Digite ou selecione o local da parada" :
+    "Digite ou selecione o destino da viagem";
 
   function handleSelect(address: string) {
     if (field === "from") setFrom(address);
     else if (field === "to") setTo(address);
     else if (field === "location") setLocation(address);
+    else if (field === "waypoint" && waypointId) setWaypointAddress(waypointId, address);
     router.back();
   }
 
@@ -101,11 +114,6 @@ export default function AddressScreen() {
       </TouchableOpacity>
     );
   }
-
-  const subtitle =
-    field === "from"     ? "Digite ou selecione o ponto de partida" :
-    field === "location" ? "Digite o local onde o veículo será exibido" :
-    "Digite ou selecione o destino da viagem";
 
   return (
     <View style={[styles.container, { backgroundColor: colors.sheet }]}>
