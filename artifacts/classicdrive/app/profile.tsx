@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 
 type MenuItem = {
@@ -27,6 +28,8 @@ type MenuSection = {
 
 export default function ProfileScreen() {
   const colors = useColors();
+  const insets = useSafeAreaInsets();
+  const bottomPad = Math.max(insets.bottom, 16);
 
   const sections: MenuSection[] = [
     {
@@ -114,7 +117,7 @@ export default function ProfileScreen() {
       {/* Menu */}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: Platform.OS === "ios" ? 24 : 32 }}
+        contentContainerStyle={{ paddingBottom: bottomPad + 16 }}
       >
         {sections.map((section, si) => (
           <View key={si} style={styles.section}>
