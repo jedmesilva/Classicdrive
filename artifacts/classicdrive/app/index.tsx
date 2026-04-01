@@ -9,20 +9,127 @@ import {
   View,
 } from "react-native";
 import { router } from "expo-router";
+import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
-import { useBooking } from "@/context/BookingContext";
+import { useBooking, type Modality } from "@/context/BookingContext";
 import VehicleCarousel from "@/components/VehicleCarousel";
 import BookingCard from "@/components/BookingCard";
+
+const MODALITIES: { id: Modality; label: string; icon: string }[] = [
+  { id: "transfer",  label: "Transfer",  icon: "arrow-right" },
+  { id: "exposicao", label: "Exposição", icon: "star"        },
+  { id: "rota",      label: "Rota",      icon: "map"         },
+];
 
 export default function HomeScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { when, from, to } = useBooking();
+  const {
+    modality, setModality,
+    when, from, to, location, duration, route,
+  } = useBooking();
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const topPad = Platform.OS === "web" ? 67 : insets.top;
+  const topPad    = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
+
+  function switchModality(m: Modality) {
+    setModality(m);
+  }
+
+  const canContract =
+    modality === "transfer"  ? !!to :
+    modality === "exposicao" ? (!!location && !!duration) :
+    modality === "rota"      ? (!!route && !!from) : false;
+
+  function renderFields() {
+    if (modality === "transfer") {
+      return (
+        <>
+          <BookingCard
+            label="Para quando?"
+            value={when}
+            placeholder="Selecionar data e hora"
+            onPress={() => router.push("/schedule")}
+          />
+          <BookingCard
+            label="De onde?"
+            value={from}
+            placeholder="Selecionar origem"
+            onPress={() => router.push({ pathname: "/address", params: { field: "from" } })}
+          />
+          <BookingCard
+            label="Para onde?"
+            value={to}
+            placeholder="Selecionar destino"
+            onPress={() => router.push({ pathname: "/address", params: { field: "to" } })}
+            last
+          />
+        </>
+      );
+    }
+
+    if (modality === "exposicao") {
+      return (
+        <>
+          <BookingCard
+            label="Para quando?"
+            value={when}
+            placeholder="Selecionar data e hora"
+            onPress={() => router.push("/schedule")}
+          />
+          <BookingCard
+            label="Local da exposição"
+            value={location}
+            placeholder="Selecionar local"
+            onPress={() => router.push({ pathname: "/address", params: { field: "location" } })}
+          />
+          <BookingCard
+            label="Por quanto tempo?"
+            value={duration?.label ?? ""}
+            placeholder="Selecionar duração"
+            onPress={() => router.push("/duration")}
+            last
+          />
+        </>
+      );
+    }
+
+    if (modality === "rota") {
+      return (
+        <>
+          <BookingCard
+            label="Para quando?"
+            value={when}
+            placeholder="Selecionar data e hora"
+            onPress={() => router.push("/schedule")}
+          />
+          <BookingCard
+            label="Rota"
+            value={route?.name ?? ""}
+            placeholder="Escolher rota"
+            onPress={() => router.push("/route")}
+          />
+          <BookingCard
+            label="De onde?"
+            value={from}
+            placeholder="Selecionar origem"
+            onPress={() => router.push({ pathname: "/address", params: { field: "from" } })}
+          />
+          <BookingCard
+            label="Para onde?"
+            value={to}
+            placeholder="Destino (opcional)"
+            onPress={() => router.push({ pathname: "/address", params: { field: "to" } })}
+            last
+          />
+        </>
+      );
+    }
+
+    return null;
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -30,6 +137,7 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: bottomPad + 40 }}
       >
+        {/* Header */}
         <View style={[styles.header, { paddingTop: topPad + 12 }]}>
           <View style={styles.avatarRow}>
             <TouchableOpacity
@@ -51,38 +159,75 @@ export default function HomeScreen() {
           </Text>
         </View>
 
+        {/* Carousel */}
         <View style={styles.carouselWrapper}>
           <VehicleCarousel activeIndex={activeIndex} onActiveChange={setActiveIndex} />
         </View>
 
-        <View style={styles.bookingSection}>
-          <BookingCard
-            label="Para quando?"
-            value={when}
-            placeholder="Selecionar data e hora"
-            onPress={() => router.push("/schedule")}
-          />
-          <BookingCard
-            label="De onde?"
-            value={from}
-            placeholder="Selecionar origem"
-            onPress={() => router.push({ pathname: "/address", params: { field: "from" } })}
-          />
-          <BookingCard
-            label="Para onde?"
-            value={to}
-            placeholder="Selecionar destino"
-            onPress={() => router.push({ pathname: "/address", params: { field: "to" } })}
-            last
-          />
+        {/* Modality Tabs */}
+        <View style={[styles.tabsWrapper, { borderBottomColor: colors.border }]}>
+          {MODALITIES.map((m) => {
+            const isActive = modality === m.id;
+            return (
+              <TouchableOpacity
+                key={m.id}
+                onPress={() => switchModality(m.id)}
+                style={styles.tab}
+                activeOpacity={0.7}
+              >
+                <View style={styles.tabContent}>
+                  <Feather
+                    name={m.icon as any}
+                    size={15}
+                    color={isActive ? colors.gold : colors.textTertiary}
+                  />
+                  <Text
+                    style={[
+                      styles.tabLabel,
+                      { color: isActive ? colors.foreground : colors.textTertiary },
+                      isActive && styles.tabLabelActive,
+                    ]}
+                  >
+                    {m.label}
+                  </Text>
+                </View>
+                <View
+                  style={[
+                    styles.tabIndicator,
+                    {
+                      backgroundColor: isActive ? colors.gold : "transparent",
+                      width: isActive ? 18 : 4,
+                    },
+                  ]}
+                />
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
+        {/* Dynamic booking fields */}
+        <View style={styles.bookingSection} key={modality}>
+          {renderFields()}
+        </View>
+
+        {/* CTA */}
         <View style={styles.ctaWrapper}>
           <TouchableOpacity
-            style={[styles.cta, { backgroundColor: colors.gold }]}
-            activeOpacity={0.88}
+            style={[
+              styles.cta,
+              { backgroundColor: canContract ? colors.gold : colors.border },
+            ]}
+            activeOpacity={canContract ? 0.88 : 1}
+            disabled={!canContract}
           >
-            <Text style={styles.ctaText}>Contratar agora</Text>
+            <Text
+              style={[
+                styles.ctaText,
+                { color: canContract ? "#fff" : colors.textPlaceholder },
+              ]}
+            >
+              {canContract ? "Contratar agora" : "Preencha os campos para continuar"}
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -120,11 +265,41 @@ const styles = StyleSheet.create({
     lineHeight: 34,
     fontFamily: "Inter_700Bold",
   },
-  carouselWrapper: { marginBottom: 28 },
+  carouselWrapper: { marginBottom: 4 },
+  tabsWrapper: {
+    flexDirection: "row",
+    marginHorizontal: 24,
+    marginBottom: 24,
+    borderBottomWidth: 0,
+  },
+  tab: {
+    flex: 1,
+    alignItems: "center",
+    paddingBottom: 0,
+  },
+  tabContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingVertical: 10,
+  },
+  tabLabel: {
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+  },
+  tabLabelActive: {
+    fontWeight: "700",
+    fontFamily: "Inter_700Bold",
+  },
+  tabIndicator: {
+    height: 4,
+    borderRadius: 2,
+    marginTop: 2,
+  },
   bookingSection: { paddingHorizontal: 24 },
   ctaWrapper: {
     paddingHorizontal: 24,
-    paddingTop: 28,
+    paddingTop: 24,
   },
   cta: {
     paddingVertical: 17,
@@ -133,7 +308,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   ctaText: {
-    color: "#fff",
     fontSize: 17,
     fontWeight: "700",
     fontFamily: "Inter_700Bold",
