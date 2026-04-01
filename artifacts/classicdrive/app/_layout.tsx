@@ -14,6 +14,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { BookingProvider } from "@/context/BookingContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -23,6 +24,26 @@ function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="schedule"
+        options={{
+          presentation: "formSheet",
+          headerShown: false,
+          sheetAllowedDetents: [0.85],
+          sheetGrabberVisible: true,
+          contentStyle: { backgroundColor: "transparent" },
+        }}
+      />
+      <Stack.Screen
+        name="address"
+        options={{
+          presentation: "formSheet",
+          headerShown: false,
+          sheetAllowedDetents: [0.88],
+          sheetGrabberVisible: true,
+          contentStyle: { backgroundColor: "transparent" },
+        }}
+      />
     </Stack>
   );
 }
@@ -49,7 +70,9 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <GestureHandlerRootView style={{ flex: 1 }}>
             <KeyboardProvider>
-              <RootLayoutNav />
+              <BookingProvider>
+                <RootLayoutNav />
+              </BookingProvider>
             </KeyboardProvider>
           </GestureHandlerRootView>
         </QueryClientProvider>
