@@ -9,16 +9,17 @@ import {
   View,
 } from "react-native";
 import { router } from "expo-router";
+import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { useBooking, type Modality } from "@/context/BookingContext";
 import VehicleCarousel from "@/components/VehicleCarousel";
 import BookingCard from "@/components/BookingCard";
 
-const MODALITIES: { id: Modality; label: string }[] = [
-  { id: "transfer",  label: "Transfer"  },
-  { id: "exposicao", label: "Exposição" },
-  { id: "rota",      label: "Rota"      },
+const MODALITIES: { id: Modality; label: string; icon: string }[] = [
+  { id: "transfer",  label: "Transfer",  icon: "arrow-right" },
+  { id: "exposicao", label: "Exposição", icon: "star"        },
+  { id: "rota",      label: "Rota",      icon: "map"         },
 ];
 
 export default function HomeScreen() {
@@ -174,15 +175,22 @@ export default function HomeScreen() {
                 style={styles.tab}
                 activeOpacity={0.7}
               >
-                <Text
-                  style={[
-                    styles.tabLabel,
-                    { color: isActive ? colors.foreground : colors.textTertiary },
-                    isActive && styles.tabLabelActive,
-                  ]}
-                >
-                  {m.label}
-                </Text>
+                <View style={styles.tabContent}>
+                  <Feather
+                    name={m.icon as any}
+                    size={15}
+                    color={isActive ? colors.gold : colors.textTertiary}
+                  />
+                  <Text
+                    style={[
+                      styles.tabLabel,
+                      { color: isActive ? colors.foreground : colors.textTertiary },
+                      isActive && styles.tabLabelActive,
+                    ]}
+                  >
+                    {m.label}
+                  </Text>
+                </View>
                 <View
                   style={[
                     styles.tabIndicator,
@@ -268,6 +276,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     paddingBottom: 0,
+  },
+  tabContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingVertical: 10,
   },
   tabLabel: {
     fontSize: 14,
