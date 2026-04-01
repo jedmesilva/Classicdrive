@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     lineHeight: 34,
     fontFamily: "Inter_700Bold",
   },
-  carouselWrapper: { marginBottom: 4 },
+  carouselWrapper: { marginBottom: 20 },
   tabsWrapper: {
     flexDirection: "row",
     marginHorizontal: 24,
