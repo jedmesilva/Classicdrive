@@ -206,10 +206,8 @@ export default function ConfirmScreen() {
               <Text style={[styles.priceRowValue, { color: colors.foreground }]}>~{hours}h</Text>
             </View>
             <View style={styles.priceRow}>
-              <Text style={[styles.priceRowLabel, { color: colors.mutedForeground }]}>
-                {vehicle.price}/hora × {hours}h
-              </Text>
-              <Text style={[styles.priceRowValue, { color: colors.foreground }]}>R${total}</Text>
+              <Text style={[styles.priceRowLabel, { color: colors.mutedForeground }]}>Valor por hora</Text>
+              <Text style={[styles.priceRowValue, { color: colors.foreground }]}>{vehicle.price}</Text>
             </View>
             <View style={[styles.priceDivider, { backgroundColor: `${colors.gold}35` }]} />
             <View style={styles.priceTotalRow}>
