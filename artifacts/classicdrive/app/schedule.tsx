@@ -212,6 +212,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingBottom: Platform.OS === "ios" ? 16 : 24,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: "hidden",
   },
   header: {
     paddingHorizontal: 24,

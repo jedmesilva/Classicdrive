@@ -143,7 +143,12 @@ export default function AddressScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: {
+    flex: 1,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: "hidden",
+  },
   searchWrapper: {
     paddingHorizontal: 24,
     paddingTop: 20,
