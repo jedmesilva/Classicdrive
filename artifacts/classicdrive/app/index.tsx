@@ -32,12 +32,16 @@ export default function HomeScreen() {
       >
         <View style={[styles.header, { paddingTop: topPad + 12 }]}>
           <View style={styles.avatarRow}>
-            <View style={[styles.avatar, { borderColor: colors.gold }]}>
+            <TouchableOpacity
+              onPress={() => router.push("/profile")}
+              activeOpacity={0.8}
+              style={[styles.avatar, { borderColor: colors.gold }]}
+            >
               <Image
                 source={{ uri: "https://i.pravatar.cc/88?img=11" }}
                 style={styles.avatarImg}
               />
-            </View>
+            </TouchableOpacity>
             <Text style={[styles.greeting, { color: colors.mutedForeground }]}>
               Olá, Lucas!
             </Text>
