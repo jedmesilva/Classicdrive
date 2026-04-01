@@ -142,7 +142,7 @@ export default function ScheduleScreen() {
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.foreground }]}>Para quando?</Text>
         <Text style={[styles.subtitle, { color: colors.textTertiary }]}>
-          Escolha dia e horário de retirada
+          Escolha dia e horário de partida
         </Text>
       </View>
 
