@@ -98,10 +98,18 @@ export default function AddressScreen() {
     );
   }
 
+  const subtitle =
+    field === "from"
+      ? "Digite ou selecione o ponto de partida"
+      : "Digite ou selecione o destino da viagem";
+
   return (
     <View style={[styles.container, { backgroundColor: colors.sheet }]}>
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: colors.foreground }]}>{label}</Text>
+        <Text style={[styles.subtitle, { color: colors.textTertiary }]}>{subtitle}</Text>
+      </View>
       <View style={styles.searchWrapper}>
-        <Text style={[styles.sheetLabel, { color: colors.mutedForeground }]}>{label}</Text>
         <View style={[
           styles.searchBox,
           { backgroundColor: colors.bgInput, borderColor: focused ? colors.gold : "transparent" },
@@ -149,17 +157,24 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     overflow: "hidden",
   },
-  searchWrapper: {
+  header: {
     paddingHorizontal: 24,
-    paddingTop: 20,
+    paddingTop: 24,
     paddingBottom: 16,
   },
-  sheetLabel: {
+  title: {
+    fontSize: 20,
+    fontWeight: "800",
+    marginBottom: 2,
+    fontFamily: "Inter_700Bold",
+  },
+  subtitle: {
     fontSize: 13,
-    fontWeight: "600",
-    letterSpacing: 0.3,
-    marginBottom: 12,
-    fontFamily: "Inter_600SemiBold",
+    fontFamily: "Inter_400Regular",
+  },
+  searchWrapper: {
+    paddingHorizontal: 24,
+    paddingBottom: 16,
   },
   searchBox: {
     flexDirection: "row",
