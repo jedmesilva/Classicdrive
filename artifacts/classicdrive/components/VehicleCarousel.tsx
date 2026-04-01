@@ -143,10 +143,13 @@ const styles = StyleSheet.create({
     borderWidth: 3,
   },
   cardInner: {
-    flex: 1,
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     borderRadius: 17,
     overflow: "hidden",
-    position: "relative",
   },
   cardImage: {
     position: "absolute",
