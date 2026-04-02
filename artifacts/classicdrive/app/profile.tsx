@@ -99,20 +99,6 @@ export default function ProfileScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Stat row */}
-      <View style={[styles.statRow, { borderBottomColor: colors.divider }]}>
-        {[
-          { value: "3", label: "Locações" },
-          { value: "2", label: "Favoritos" },
-          { value: "4.9★", label: "Avaliação" },
-        ].map((s, i) => (
-          <View key={i} style={styles.statItem}>
-            <Text style={[styles.statValue, { color: colors.foreground }]}>{s.value}</Text>
-            <Text style={[styles.statLabel, { color: colors.mutedForeground }]}>{s.label}</Text>
-          </View>
-        ))}
-      </View>
-
       {/* Menu */}
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -277,25 +263,6 @@ const styles = StyleSheet.create({
   editBtnText: {
     fontSize: 13,
     fontFamily: "Inter_500Medium",
-  },
-  statRow: {
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    paddingVertical: 16,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: "center",
-    gap: 2,
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: "800",
-    fontFamily: "Inter_700Bold",
-  },
-  statLabel: {
-    fontSize: 12,
-    fontFamily: "Inter_400Regular",
   },
   section: {
     paddingHorizontal: 24,
