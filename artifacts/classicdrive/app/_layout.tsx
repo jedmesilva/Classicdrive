@@ -83,6 +83,13 @@ function RootLayoutNav() {
         }}
       />
       <Stack.Screen
+        name="identity-verification"
+        options={{
+          headerShown: false,
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
         name="duration"
         options={{
           presentation: "formSheet",

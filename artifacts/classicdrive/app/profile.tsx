@@ -12,12 +12,15 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 
+type VerificationBadge = { label: string; color: string; bg: string };
+
 type MenuItem = {
   icon: React.ComponentProps<typeof Feather>["name"];
   label: string;
   sublabel?: string;
   onPress?: () => void;
   danger?: boolean;
+  badge?: VerificationBadge;
 };
 
 type MenuSection = {
@@ -43,6 +46,7 @@ export default function ProfileScreen() {
       items: [
         { icon: "credit-card", label: "Métodos de Pagamento", sublabel: "Visa •••• 4242", onPress: () => router.push("/payment-methods") },
         { icon: "map-pin", label: "Endereços Salvos", sublabel: "2 endereços" },
+        { icon: "shield", label: "Verificação de Identidade", onPress: () => router.push("/identity-verification"), badge: { label: "Não verificado", color: "#B45309", bg: "#FFF8E1" } },
         { icon: "bell", label: "Notificações" },
       ],
     },
@@ -152,14 +156,23 @@ export default function ProfileScreen() {
                       />
                     </View>
                     <View style={styles.menuText}>
-                      <Text
-                        style={[
-                          styles.menuLabel,
-                          { color: item.danger ? colors.destructive : colors.foreground },
-                        ]}
-                      >
-                        {item.label}
-                      </Text>
+                      <View style={styles.menuLabelRow}>
+                        <Text
+                          style={[
+                            styles.menuLabel,
+                            { color: item.danger ? colors.destructive : colors.foreground },
+                          ]}
+                        >
+                          {item.label}
+                        </Text>
+                        {item.badge ? (
+                          <View style={[styles.verificationBadge, { backgroundColor: item.badge.bg }]}>
+                            <Text style={[styles.verificationBadgeText, { color: item.badge.color }]}>
+                              {item.badge.label}
+                            </Text>
+                          </View>
+                        ) : null}
+                      </View>
                       {item.sublabel ? (
                         <Text style={[styles.menuSublabel, { color: colors.mutedForeground }]}>
                           {item.sublabel}
@@ -318,6 +331,12 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   menuText: { flex: 1, gap: 2 },
+  menuLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    flexWrap: "wrap",
+  },
   menuLabel: {
     fontSize: 15,
     fontWeight: "600",
@@ -326,6 +345,16 @@ const styles = StyleSheet.create({
   menuSublabel: {
     fontSize: 12,
     fontFamily: "Inter_400Regular",
+  },
+  verificationBadge: {
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 20,
+  },
+  verificationBadgeText: {
+    fontSize: 11,
+    fontWeight: "700",
+    fontFamily: "Inter_700Bold",
   },
   itemDivider: {
     height: 1,
