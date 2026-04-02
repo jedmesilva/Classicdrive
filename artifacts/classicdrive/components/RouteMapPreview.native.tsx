@@ -1,6 +1,6 @@
-import React, { useMemo } from "react";
-import { StyleSheet, View } from "react-native";
-import MapView, { Polyline, Marker, PROVIDER_DEFAULT } from "react-native-maps";
+import React, { memo, useMemo } from "react";
+import { Platform, StyleSheet } from "react-native";
+import MapView, { Polyline, PROVIDER_DEFAULT } from "react-native-maps";
 import type { Route } from "@/context/BookingContext";
 
 function getRegionForCoordinates(coords: Route["coordinates"]) {
@@ -24,71 +24,41 @@ type Props = {
   accentColor: string;
 };
 
-export default function RouteMapPreview({ route, accentColor }: Props) {
+function RouteMapPreview({ route, accentColor }: Props) {
   const region = useMemo(
     () => getRegionForCoordinates(route.coordinates),
-    [route.coordinates]
+    [route.id]
   );
 
   return (
     <MapView
       style={styles.map}
       provider={PROVIDER_DEFAULT}
-      region={region}
+      initialRegion={region}
       scrollEnabled={false}
       zoomEnabled={false}
       pitchEnabled={false}
       rotateEnabled={false}
       pointerEvents="none"
+      liteMode={Platform.OS === "android"}
+      moveOnMarkerPress={false}
     >
       <Polyline
         coordinates={route.coordinates}
         strokeColor={accentColor}
-        strokeWidth={3}
+        strokeWidth={3.5}
+        lineCap="round"
+        lineJoin="round"
       />
-      {route.coordinates.map((coord, index) => {
-        const isEndpoint =
-          index === 0 || index === route.coordinates.length - 1;
-        return (
-          <Marker
-            key={index}
-            coordinate={coord}
-            anchor={{ x: 0.5, y: 0.5 }}
-          >
-            <View
-              style={[
-                styles.dot,
-                isEndpoint
-                  ? { backgroundColor: accentColor, borderColor: accentColor }
-                  : styles.dotMid,
-              ]}
-            />
-          </Marker>
-        );
-      })}
     </MapView>
   );
 }
+
+export default memo(RouteMapPreview);
 
 const styles = StyleSheet.create({
   map: {
     width: "100%",
     height: 150,
-  },
-  dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    borderWidth: 2,
-    borderColor: "#ffffff",
-    backgroundColor: "#ffffff",
-  },
-  dotMid: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    borderWidth: 1.5,
-    borderColor: "#aaa",
-    backgroundColor: "#ffffff",
   },
 });

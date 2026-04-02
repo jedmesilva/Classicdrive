@@ -88,7 +88,7 @@ export default function RouteScreen() {
       <TouchableOpacity
         onPress={() => handleSelect(item)}
         activeOpacity={0.8}
-        delayPressIn={100}
+        delayPressIn={50}
         style={[
           styles.card,
           {
