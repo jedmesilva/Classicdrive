@@ -206,6 +206,7 @@ export default function HistoryScreen() {
       {/* List */}
       <ScrollView
         showsVerticalScrollIndicator={false}
+        style={styles.listScroll}
         contentContainerStyle={[styles.listContent, { paddingBottom: bottomPad + 16 }]}
       >
         {filtered.length === 0 && (
@@ -334,6 +335,7 @@ const styles = StyleSheet.create({
 
   filterScroll: {
     flexGrow: 0,
+    flexShrink: 0,
     borderBottomWidth: 1,
   },
   filterContent: {
@@ -341,8 +343,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     gap: 8,
     flexDirection: "row",
+    alignItems: "center",
   },
   filterChip: {
+    flexShrink: 0,
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 20,
@@ -354,6 +358,9 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
   },
 
+  listScroll: {
+    flex: 1,
+  },
   listContent: {
     padding: 20,
     gap: 14,
