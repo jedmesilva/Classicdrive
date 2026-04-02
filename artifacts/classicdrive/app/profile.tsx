@@ -45,9 +45,8 @@ export default function ProfileScreen() {
       title: "Conta",
       items: [
         { icon: "credit-card", label: "Métodos de Pagamento", sublabel: "Visa •••• 4242", onPress: () => router.push("/payment-methods") },
-        { icon: "map-pin", label: "Endereços Salvos", sublabel: "2 endereços" },
         { icon: "shield", label: "Verificação de Identidade", onPress: () => router.push("/identity-verification"), badge: { label: "Não verificado", color: "#B45309", bg: "#FFF8E1" } },
-        { icon: "bell", label: "Notificações" },
+        { icon: "bell", label: "Notificações", onPress: () => router.push("/notifications") },
       ],
     },
     {
