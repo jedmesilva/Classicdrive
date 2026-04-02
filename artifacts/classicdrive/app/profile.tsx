@@ -83,10 +83,6 @@ export default function ProfileScreen() {
           <Text style={[styles.heroEmail, { color: colors.mutedForeground }]}>
             lucas@email.com
           </Text>
-          <View style={[styles.heroBadge, { backgroundColor: `${colors.gold}18`, borderColor: `${colors.gold}40` }]}>
-            <Feather name="star" size={11} color={colors.gold} />
-            <Text style={[styles.heroBadgeText, { color: colors.gold }]}>Membro Gold</Text>
-          </View>
         </View>
 
         <TouchableOpacity
@@ -233,22 +229,6 @@ const styles = StyleSheet.create({
   heroEmail: {
     fontSize: 13,
     fontFamily: "Inter_400Regular",
-  },
-  heroBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    alignSelf: "flex-start",
-    marginTop: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  heroBadgeText: {
-    fontSize: 11,
-    fontWeight: "700",
-    fontFamily: "Inter_700Bold",
   },
   editBtn: {
     flexDirection: "row",
