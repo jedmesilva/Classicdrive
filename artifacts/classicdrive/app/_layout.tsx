@@ -69,8 +69,9 @@ function RootLayoutNav() {
         options={{
           presentation: "formSheet",
           headerShown: false,
-          sheetAllowedDetents: [0.85],
+          sheetAllowedDetents: [0.92],
           sheetGrabberVisible: true,
+          sheetExpandsWhenScrolledToEdge: false,
           contentStyle: { backgroundColor: "transparent" },
         }}
       />

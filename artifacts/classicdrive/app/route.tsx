@@ -1,12 +1,11 @@
 import React from "react";
 import {
-  FlatList,
   Platform,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
+import { FlatList, TouchableOpacity } from "react-native-gesture-handler";
 import { router } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
@@ -89,6 +88,7 @@ export default function RouteScreen() {
       <TouchableOpacity
         onPress={() => handleSelect(item)}
         activeOpacity={0.8}
+        delayPressIn={100}
         style={[
           styles.card,
           {
@@ -175,6 +175,9 @@ export default function RouteScreen() {
         renderItem={renderItem}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
+        nestedScrollEnabled={true}
+        keyboardShouldPersistTaps="handled"
+        overScrollMode="never"
       />
     </View>
   );
