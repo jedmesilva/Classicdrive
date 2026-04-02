@@ -17,6 +17,11 @@ export type Modality = "rotalivre" | "exposicao" | "rota";
 
 export type Duration = { label: string; hours: number };
 
+export type RouteCoordinate = {
+  latitude: number;
+  longitude: number;
+};
+
 export type Route = {
   id: number;
   name: string;
@@ -24,6 +29,7 @@ export type Route = {
   stops: number;
   distance: string;
   author: string;
+  coordinates: RouteCoordinate[];
 };
 
 export type Waypoint = {
