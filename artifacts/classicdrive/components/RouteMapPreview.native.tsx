@@ -1,99 +1,138 @@
-import React, { memo, useMemo } from "react";
-import { StyleSheet, View } from "react-native";
+import React, { memo, useMemo, useState } from "react";
+import { StyleSheet, useWindowDimensions, View } from "react-native";
 import { Image } from "expo-image";
 import Svg, { Circle, Polyline } from "react-native-svg";
 import type { Route } from "@/context/BookingContext";
 
-const W = 360;
-const H = 150;
-const PAD = 24;
-const IMG_W = 720;
-const IMG_H = 300;
+const CARD_H = 150;
+// list has paddingHorizontal:16 on each side
+const SIDE_PAD = 32;
 
-function getBoundingBox(coords: Route["coordinates"]) {
-  const lats = coords.map((c) => c.latitude);
-  const lngs = coords.map((c) => c.longitude);
-  return {
-    minLat: Math.min(...lats),
-    maxLat: Math.max(...lats),
-    minLng: Math.min(...lngs),
-    maxLng: Math.max(...lngs),
-    centerLat: (Math.min(...lats) + Math.max(...lats)) / 2,
-    centerLng: (Math.min(...lngs) + Math.max(...lngs)) / 2,
-  };
+// ── Mercator helpers ──────────────────────────────────────────────────────────
+
+function wx(lng: number, z: number): number {
+  return ((lng + 180) / 360) * Math.pow(2, z) * 256;
 }
-
-function calcZoom(maxDelta: number): number {
-  if (maxDelta > 0.1) return 12;
-  if (maxDelta > 0.05) return 13;
-  if (maxDelta > 0.02) return 14;
-  return 15;
-}
-
-function buildMapUrl(coords: Route["coordinates"]): string {
-  const bb = getBoundingBox(coords);
-  const maxDelta = Math.max(bb.maxLat - bb.minLat, bb.maxLng - bb.minLng);
-  const zoom = calcZoom(maxDelta);
-  const path = coords.map((c) => `${c.latitude},${c.longitude}`).join("|");
+function wy(lat: number, z: number): number {
+  const r = (lat * Math.PI) / 180;
   return (
-    `https://staticmap.openstreetmap.de/staticmap.php` +
-    `?center=${bb.centerLat},${bb.centerLng}` +
-    `&zoom=${zoom}` +
-    `&size=${IMG_W}x${IMG_H}` +
-    `&maptype=osm` +
-    `&path=color:0xC9A84Cff|weight:5|${path}`
+    ((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2) *
+    Math.pow(2, z) *
+    256
   );
 }
 
-function normalize(coords: Route["coordinates"]) {
-  const bb = getBoundingBox(coords);
-  const latRange = bb.maxLat - bb.minLat || 0.001;
-  const lngRange = bb.maxLng - bb.minLng || 0.001;
-  const drawW = W - PAD * 2;
-  const drawH = H - PAD * 2;
-  const scale = Math.min(drawW / lngRange, drawH / latRange);
-  const offX = (drawW - lngRange * scale) / 2 + PAD;
-  const offY = (drawH - latRange * scale) / 2 + PAD;
+/** Pick zoom so the whole route bounding box fits inside ONE tile (×85% margin) */
+function pickZoom(coords: Route["coordinates"]): number {
+  const lats = coords.map((c) => c.latitude);
+  const lngs = coords.map((c) => c.longitude);
+  const span = Math.max(
+    Math.max(...lats) - Math.min(...lats),
+    Math.max(...lngs) - Math.min(...lngs)
+  );
+  for (let z = 15; z >= 9; z--) {
+    if (span < (360 / Math.pow(2, z)) * 0.82) return z;
+  }
+  return 9;
+}
+
+function buildTile(coords: Route["coordinates"]) {
+  const lats = coords.map((c) => c.latitude);
+  const lngs = coords.map((c) => c.longitude);
+  const clat = (Math.min(...lats) + Math.max(...lats)) / 2;
+  const clng = (Math.min(...lngs) + Math.max(...lngs)) / 2;
+  const z = pickZoom(coords);
+
+  const tx = Math.floor(((clng + 180) / 360) * Math.pow(2, z));
+  const cr = (clat * Math.PI) / 180;
+  const ty = Math.floor(
+    ((1 - Math.log(Math.tan(cr) + 1 / Math.cos(cr)) / Math.PI) / 2) *
+      Math.pow(2, z)
+  );
+
+  // Carto dark basemap – free, no API key needed
+  const url = `https://basemaps.cartocdn.com/dark_all/${z}/${tx}/${ty}@2x.png`;
+  return { z, tx, ty, url };
+}
+
+/**
+ * Project coords onto display space.
+ * contentFit="fill" stretches the square tile to W×CARD_H,
+ * so x and y are projected independently (no crop, no letterbox).
+ *   px = ((worldX - tileOriginX) / 256) * W
+ *   py = ((worldY - tileOriginY) / 256) * CARD_H
+ */
+function projectCoords(
+  coords: Route["coordinates"],
+  z: number,
+  tx: number,
+  ty: number,
+  W: number
+) {
+  const ox = tx * 256;
+  const oy = ty * 256;
   return coords.map((c) => ({
-    x: (c.longitude - bb.minLng) * scale + offX,
-    y: (bb.maxLat - c.latitude) * scale + offY,
+    x: ((wx(c.longitude, z) - ox) / 256) * W,
+    y: ((wy(c.latitude, z) - oy) / 256) * CARD_H,
   }));
 }
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 type Props = { route: Route; accentColor: string };
 
 function RouteMapPreview({ route, accentColor }: Props) {
-  const mapUrl = useMemo(() => buildMapUrl(route.coordinates), [route.id]);
-  const pts = useMemo(() => normalize(route.coordinates), [route.id]);
-  const pointsStr = pts.map((p) => `${p.x},${p.y}`).join(" ");
-  const start = pts[0];
-  const end = pts[pts.length - 1];
+  const { width: screenW } = useWindowDimensions();
+  const W = screenW - SIDE_PAD;
+
+  const { z, tx, ty, url } = useMemo(() => buildTile(route.coordinates), [route.id]);
+  const pts = useMemo(
+    () => projectCoords(route.coordinates, z, tx, ty, W),
+    [route.id, W]
+  );
+
+  const [mapReady, setMapReady] = useState(false);
+  const [mapFailed, setMapFailed] = useState(false);
+
+  const pStr = pts.map((p) => `${p.x},${p.y}`).join(" ");
+  const s = pts[0];
+  const e = pts[pts.length - 1];
   const mid = pts.slice(1, -1);
 
   return (
-    <View style={styles.container}>
-      {/* Real map tiles as background */}
-      <Image
-        source={{ uri: mapUrl }}
-        style={StyleSheet.absoluteFill}
-        contentFit="cover"
-        cachePolicy="memory-disk"
-        transition={200}
+    <View style={[styles.container, { width: W }]}>
+      {/* Carto dark tile – fill stretches the square tile to W×CARD_H */}
+      {!mapFailed && (
+        <Image
+          source={{ uri: url }}
+          style={StyleSheet.absoluteFill}
+          contentFit="fill"
+          cachePolicy="memory-disk"
+          transition={300}
+          onLoad={() => setMapReady(true)}
+          onError={() => setMapFailed(true)}
+        />
+      )}
+
+      {/* Vignette overlay – lighter once map is visible */}
+      <View
+        style={[
+          styles.vignette,
+          mapReady
+            ? { backgroundColor: "rgba(0,0,0,0.25)" }
+            : { backgroundColor: "rgba(10,14,23,0.94)" },
+        ]}
       />
 
-      {/* Dark overlay for contrast */}
-      <View style={styles.overlay} />
-
-      {/* SVG route on top in gold */}
+      {/* SVG route – Mercator-projected to align with the tile */}
       <Svg
         style={StyleSheet.absoluteFill}
-        width="100%"
-        height={H}
-        viewBox={`0 0 ${W} ${H}`}
+        viewBox={`0 0 ${W} ${CARD_H}`}
+        preserveAspectRatio="none"
       >
         {/* Glow */}
         <Polyline
-          points={pointsStr}
+          points={pStr}
           fill="none"
           stroke={accentColor}
           strokeWidth={10}
@@ -101,12 +140,12 @@ function RouteMapPreview({ route, accentColor }: Props) {
           strokeLinejoin="round"
           opacity={0.22}
         />
-        {/* Main line */}
+        {/* Route line */}
         <Polyline
-          points={pointsStr}
+          points={pStr}
           fill="none"
           stroke={accentColor}
-          strokeWidth={3}
+          strokeWidth={3.5}
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -118,12 +157,12 @@ function RouteMapPreview({ route, accentColor }: Props) {
           </React.Fragment>
         ))}
         {/* Start */}
-        <Circle cx={start.x} cy={start.y} r={7} fill={accentColor} opacity={0.3} />
-        <Circle cx={start.x} cy={start.y} r={4} fill={accentColor} />
-        <Circle cx={start.x} cy={start.y} r={2} fill="#fff" />
+        <Circle cx={s.x} cy={s.y} r={9} fill={accentColor} opacity={0.2} />
+        <Circle cx={s.x} cy={s.y} r={5} fill={accentColor} />
+        <Circle cx={s.x} cy={s.y} r={2.5} fill="#fff" />
         {/* End */}
-        <Circle cx={end.x} cy={end.y} r={7} fill={accentColor} opacity={0.3} />
-        <Circle cx={end.x} cy={end.y} r={4} fill={accentColor} />
+        <Circle cx={e.x} cy={e.y} r={9} fill={accentColor} opacity={0.2} />
+        <Circle cx={e.x} cy={e.y} r={5} fill={accentColor} />
       </Svg>
     </View>
   );
@@ -133,13 +172,11 @@ export default memo(RouteMapPreview);
 
 const styles = StyleSheet.create({
   container: {
-    width: "100%",
-    height: H,
+    height: CARD_H,
     overflow: "hidden",
-    backgroundColor: "#111827",
+    backgroundColor: "#0a0e17",
   },
-  overlay: {
+  vignette: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.28)",
   },
 });
