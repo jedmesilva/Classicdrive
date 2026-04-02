@@ -35,7 +35,7 @@ export default function ProfileScreen() {
       title: "Atividade",
       items: [
         { icon: "clock", label: "Meu Histórico", sublabel: "3 locações realizadas", onPress: () => router.push("/history") },
-        { icon: "heart", label: "Veículos Favoritos", sublabel: "Mustang, Bel Air" },
+        { icon: "heart", label: "Veículos Favoritos", sublabel: "Mustang, Bel Air", onPress: () => router.push("/favorites") },
       ],
     },
     {
