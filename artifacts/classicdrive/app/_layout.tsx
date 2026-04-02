@@ -57,11 +57,8 @@ function RootLayoutNav() {
       <Stack.Screen
         name="history"
         options={{
-          presentation: "formSheet",
           headerShown: false,
-          sheetAllowedDetents: [0.92],
-          sheetGrabberVisible: true,
-          contentStyle: { backgroundColor: "transparent" },
+          animation: "slide_from_right",
         }}
       />
       <Stack.Screen

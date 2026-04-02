@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 
@@ -110,6 +111,7 @@ const FILTERS: { id: FilterTab; label: string }[] = [
 export default function HistoryScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Math.max(insets.bottom, 16);
   const [activeFilter, setActiveFilter] = useState<FilterTab>("todas");
 
@@ -147,13 +149,23 @@ export default function HistoryScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.sheet }]}>
+    <View style={[styles.container, { backgroundColor: colors.background ?? colors.sheet }]}>
       {/* Header */}
-      <View style={[styles.header, { borderBottomColor: colors.divider }]}>
-        <Text style={[styles.title, { color: colors.foreground }]}>Meu Histórico</Text>
-        <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
-          {SOLICITACOES.length} solicitações no total
-        </Text>
+      <View style={[styles.header, { borderBottomColor: colors.divider, paddingTop: topPad + 8 }]}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          activeOpacity={0.7}
+          style={styles.backButton}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Feather name="arrow-left" size={22} color={colors.foreground} />
+        </TouchableOpacity>
+        <View style={styles.headerText}>
+          <Text style={[styles.title, { color: colors.foreground }]}>Meu Histórico</Text>
+          <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
+            {SOLICITACOES.length} solicitações no total
+          </Text>
+        </View>
       </View>
 
       {/* Filter tabs */}
@@ -291,15 +303,23 @@ function DetailRow({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    overflow: "hidden",
   },
   header: {
-    paddingHorizontal: 24,
-    paddingTop: 24,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
+    gap: 14,
+  },
+  backButton: {
+    width: 38,
+    height: 38,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerText: {
+    flex: 1,
   },
   title: {
     fontSize: 22,
