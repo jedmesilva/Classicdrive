@@ -41,7 +41,7 @@ export default function ProfileScreen() {
     {
       title: "Conta",
       items: [
-        { icon: "credit-card", label: "Métodos de Pagamento", sublabel: "Visa •••• 4242" },
+        { icon: "credit-card", label: "Métodos de Pagamento", sublabel: "Visa •••• 4242", onPress: () => router.push("/payment-methods") },
         { icon: "map-pin", label: "Endereços Salvos", sublabel: "2 endereços" },
         { icon: "bell", label: "Notificações" },
       ],

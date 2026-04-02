@@ -69,6 +69,13 @@ function RootLayoutNav() {
         }}
       />
       <Stack.Screen
+        name="payment-methods"
+        options={{
+          headerShown: false,
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
         name="duration"
         options={{
           presentation: "formSheet",
