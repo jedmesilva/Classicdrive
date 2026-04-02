@@ -73,11 +73,6 @@ export default function ProfileScreen() {
               style={styles.avatar}
             />
           </View>
-          <TouchableOpacity
-            style={[styles.editBadge, { backgroundColor: colors.gold }]}
-          >
-            <Feather name="camera" size={12} color="#fff" />
-          </TouchableOpacity>
         </View>
 
         <View style={styles.heroInfo}>
@@ -92,6 +87,8 @@ export default function ProfileScreen() {
         </View>
 
         <TouchableOpacity
+          onPress={() => router.push("/edit-profile")}
+          activeOpacity={0.7}
           style={[styles.editBtn, { borderColor: colors.border, backgroundColor: colors.surface }]}
         >
           <Feather name="edit-2" size={15} color={colors.mutedForeground} />

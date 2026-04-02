@@ -76,6 +76,13 @@ function RootLayoutNav() {
         }}
       />
       <Stack.Screen
+        name="edit-profile"
+        options={{
+          headerShown: false,
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
         name="duration"
         options={{
           presentation: "formSheet",
