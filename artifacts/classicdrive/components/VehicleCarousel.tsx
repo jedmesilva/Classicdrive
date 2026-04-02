@@ -1,5 +1,6 @@
 import React, { useRef, useState } from "react";
 import {
+  Animated,
   Dimensions,
   FlatList,
   Image,
@@ -9,6 +10,7 @@ import {
   View,
   ViewToken,
 } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
 import { useColors } from "@/hooks/useColors";
 
 export type Vehicle = {
@@ -64,6 +66,37 @@ export default function VehicleCarousel({ activeIndex, onActiveChange }: Props) 
   const colors = useColors();
   const flatRef = useRef<FlatList>(null);
 
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const heartScales = useRef(VEHICLES.map(() => new Animated.Value(1))).current;
+
+  function toggleFavorite(id: number, index: number) {
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+
+    // Bounce animation
+    Animated.sequence([
+      Animated.spring(heartScales[index], {
+        toValue: 1.4,
+        useNativeDriver: true,
+        speed: 400,
+        bounciness: 0,
+      }),
+      Animated.spring(heartScales[index], {
+        toValue: 1,
+        useNativeDriver: true,
+        speed: 150,
+        bounciness: 8,
+      }),
+    ]).start();
+  }
+
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
       if (viewableItems.length > 0 && viewableItems[0].index !== null) {
@@ -84,12 +117,19 @@ export default function VehicleCarousel({ activeIndex, onActiveChange }: Props) 
         snapToInterval={CARD_W + 14}
         decelerationRate="fast"
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 24, gap: 14, paddingBottom: 8, paddingTop: 8 }}
+        contentContainerStyle={{
+          paddingHorizontal: 24,
+          gap: 14,
+          paddingBottom: 8,
+          paddingTop: 8,
+        }}
         keyExtractor={(item) => String(item.id)}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
         renderItem={({ item, index }) => {
           const selected = activeIndex === index;
+          const isFav = favorites.has(item.id);
+
           return (
             <TouchableOpacity
               activeOpacity={0.93}
@@ -98,17 +138,42 @@ export default function VehicleCarousel({ activeIndex, onActiveChange }: Props) 
             >
               <Image source={item.image} style={styles.cardImage} resizeMode="cover" />
               <View style={styles.overlay} />
+
+              {/* Tag badge – top left */}
               <View style={[styles.badge, { backgroundColor: colors.gold }]}>
                 <Text style={styles.badgeText}>{item.tag}</Text>
               </View>
+
+              {/* Heart button – top right */}
+              <TouchableOpacity
+                style={styles.heartBtn}
+                onPress={() => toggleFavorite(item.id, index)}
+                activeOpacity={0.85}
+                hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
+              >
+                <Animated.View
+                  style={{ transform: [{ scale: heartScales[index] }] }}
+                >
+                  <AntDesign
+                    name={isFav ? "heart" : "hearto"}
+                    size={19}
+                    color={isFav ? colors.gold : "rgba(255,255,255,0.85)"}
+                  />
+                </Animated.View>
+              </TouchableOpacity>
+
+              {/* Bottom content */}
               <View style={styles.cardContent}>
                 <Text style={styles.cardYear}>{item.year}</Text>
                 <Text style={styles.cardName}>{item.name}</Text>
                 <View style={{ flexDirection: "row", alignItems: "baseline", gap: 4 }}>
-                  <Text style={[styles.cardPrice, { color: colors.goldLight }]}>{item.price}</Text>
+                  <Text style={[styles.cardPrice, { color: colors.goldLight }]}>
+                    {item.price}
+                  </Text>
                   <Text style={styles.cardPriceSub}>/hora</Text>
                 </View>
               </View>
+
               {selected && (
                 <View
                   style={[styles.selectionRing, { borderColor: colors.gold }]}
@@ -119,6 +184,8 @@ export default function VehicleCarousel({ activeIndex, onActiveChange }: Props) 
           );
         }}
       />
+
+      {/* Pagination dots */}
       <View style={styles.dots}>
         {VEHICLES.map((_, i) => (
           <TouchableOpacity
@@ -186,6 +253,17 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "700",
     letterSpacing: 0.8,
+  },
+  heartBtn: {
+    position: "absolute",
+    top: 14,
+    right: 14,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "rgba(0,0,0,0.38)",
+    alignItems: "center",
+    justifyContent: "center",
   },
   cardContent: {
     position: "absolute",
