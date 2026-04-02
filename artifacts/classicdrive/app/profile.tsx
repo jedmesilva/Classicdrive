@@ -34,7 +34,7 @@ export default function ProfileScreen() {
     {
       title: "Atividade",
       items: [
-        { icon: "clock", label: "Minhas Viagens", sublabel: "3 viagens realizadas" },
+        { icon: "clock", label: "Meu Histórico", sublabel: "3 locações realizadas", onPress: () => router.push("/history") },
         { icon: "heart", label: "Veículos Favoritos", sublabel: "Mustang, Bel Air" },
       ],
     },
@@ -102,7 +102,7 @@ export default function ProfileScreen() {
       {/* Stat row */}
       <View style={[styles.statRow, { borderBottomColor: colors.divider }]}>
         {[
-          { value: "3", label: "Viagens" },
+          { value: "3", label: "Locações" },
           { value: "2", label: "Favoritos" },
           { value: "4.9★", label: "Avaliação" },
         ].map((s, i) => (
