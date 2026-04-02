@@ -20,6 +20,12 @@ const COMMUNITY_ROUTES: Route[] = [
     stops: 4,
     distance: "18km",
     author: "Carlos M.",
+    stopNames: [
+      "Praça Sete de Setembro",
+      "Edifício Acaiaca",
+      "Igreja São José",
+      "Mercado Central",
+    ],
     coordinates: [
       { latitude: -19.9232, longitude: -43.9469 },
       { latitude: -19.9195, longitude: -43.9456 },
@@ -34,6 +40,11 @@ const COMMUNITY_ROUTES: Route[] = [
     stops: 3,
     distance: "9km",
     author: "Ana R.",
+    stopNames: [
+      "Praça da Savassi",
+      "Restaurante Xapuri",
+      "Bar do Salomão",
+    ],
     coordinates: [
       { latitude: -19.9381, longitude: -43.9322 },
       { latitude: -19.9347, longitude: -43.9299 },
@@ -47,6 +58,14 @@ const COMMUNITY_ROUTES: Route[] = [
     stops: 6,
     distance: "24km",
     author: "Pedro L.",
+    stopNames: [
+      "Praça da Liberdade",
+      "Palácio das Artes",
+      "Igreja São Francisco de Assis",
+      "Casa do Baile",
+      "Mineirão",
+      "Mineirinho",
+    ],
     coordinates: [
       { latitude: -19.9318, longitude: -43.9376 },
       { latitude: -19.9232, longitude: -43.9469 },
@@ -63,6 +82,13 @@ const COMMUNITY_ROUTES: Route[] = [
     stops: 5,
     distance: "21km",
     author: "Julia F.",
+    stopNames: [
+      "Museu de Arte da Pampulha",
+      "Igreja São Francisco de Assis",
+      "Casa do Baile",
+      "Iate Clube da Pampulha",
+      "Estádio Mineirão",
+    ],
     coordinates: [
       { latitude: -19.8558, longitude: -43.9669 },
       { latitude: -19.8588, longitude: -43.9726 },
@@ -72,6 +98,102 @@ const COMMUNITY_ROUTES: Route[] = [
     ],
   },
 ];
+
+// ── Stop list timeline ────────────────────────────────────────────────────────
+
+type StopListProps = {
+  stops: string[];
+  accentColor: string;
+  mutedColor: string;
+  borderColor: string;
+};
+
+function StopList({ stops, accentColor, mutedColor, borderColor }: StopListProps) {
+  return (
+    <View style={sl.wrapper}>
+      {stops.map((name, i) => {
+        const isFirst = i === 0;
+        const isLast = i === stops.length - 1;
+        return (
+          <View key={i} style={sl.row}>
+            {/* Timeline column */}
+            <View style={sl.track}>
+              {!isFirst && (
+                <View style={[sl.lineTop, { backgroundColor: borderColor }]} />
+              )}
+              <View
+                style={[
+                  sl.dot,
+                  isFirst || isLast
+                    ? { backgroundColor: accentColor, width: 8, height: 8, borderRadius: 4 }
+                    : { backgroundColor: mutedColor, width: 5, height: 5, borderRadius: 2.5 },
+                ]}
+              />
+              {!isLast && (
+                <View style={[sl.lineBottom, { backgroundColor: borderColor }]} />
+              )}
+            </View>
+            {/* Stop name */}
+            <Text
+              style={[
+                sl.stopName,
+                {
+                  color: isFirst || isLast ? accentColor : mutedColor,
+                  fontWeight: isFirst || isLast ? "600" : "400",
+                },
+              ]}
+              numberOfLines={1}
+            >
+              {name}
+            </Text>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+const sl = StyleSheet.create({
+  wrapper: {
+    marginTop: 10,
+    marginBottom: 2,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    minHeight: 22,
+  },
+  track: {
+    width: 20,
+    alignItems: "center",
+    alignSelf: "stretch",
+    justifyContent: "center",
+  },
+  lineTop: {
+    position: "absolute",
+    top: 0,
+    bottom: "50%",
+    width: 1,
+  },
+  lineBottom: {
+    position: "absolute",
+    top: "50%",
+    bottom: 0,
+    width: 1,
+  },
+  dot: {
+    zIndex: 1,
+  },
+  stopName: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    marginLeft: 8,
+    paddingVertical: 3,
+  },
+});
+
+// ── Main screen ───────────────────────────────────────────────────────────────
 
 export default function RouteScreen() {
   const colors = useColors();
@@ -101,18 +223,11 @@ export default function RouteScreen() {
         {/* Map preview */}
         <View style={styles.mapWrapper}>
           <RouteMapPreview route={item} accentColor={colors.gold} />
-          {/* Paradas badge */}
-          <View style={[styles.stopBadge, { backgroundColor: colors.card }]}>
-            <Feather name="map-pin" size={10} color={colors.gold} />
-            <Text style={[styles.stopBadgeText, { color: colors.gold }]}>
-              {item.stops} paradas
-            </Text>
-          </View>
         </View>
 
-        {/* Conteúdo abaixo do mapa */}
+        {/* Card body */}
         <View style={styles.content}>
-          {/* Título */}
+          {/* Title row */}
           <View style={styles.cardTop}>
             <Text
               style={[styles.cardName, { color: colors.foreground }]}
@@ -148,6 +263,14 @@ export default function RouteScreen() {
               </Text>
             </View>
           </View>
+
+          {/* Stop list */}
+          <StopList
+            stops={item.stopNames}
+            accentColor={colors.gold}
+            mutedColor={colors.textMuted}
+            borderColor={colors.border}
+          />
 
           <Text style={[styles.author, { color: colors.textTertiary }]}>
             por {item.author}
@@ -216,29 +339,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   mapWrapper: {
-    position: "relative",
     height: 150,
-  },
-  stopBadge: {
-    position: "absolute",
-    bottom: 8,
-    right: 8,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  stopBadgeText: {
-    fontSize: 11,
-    fontWeight: "600",
-    fontFamily: "Inter_700Bold",
   },
   content: {
     padding: 14,
@@ -268,7 +369,6 @@ const styles = StyleSheet.create({
   metaRow: {
     flexDirection: "row",
     gap: 14,
-    marginBottom: 6,
     flexWrap: "wrap",
   },
   metaChip: {
@@ -283,5 +383,6 @@ const styles = StyleSheet.create({
   author: {
     fontSize: 12,
     fontFamily: "Inter_400Regular",
+    marginTop: 10,
   },
 });

@@ -30,6 +30,7 @@ export type Route = {
   distance: string;
   author: string;
   coordinates: RouteCoordinate[];
+  stopNames: string[];
 };
 
 export type Waypoint = {
